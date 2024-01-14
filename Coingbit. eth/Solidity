@@ -1,0 +1,42 @@
+pragma solidity ^0.8.0;
+
+contract Coingbit {
+    string public name;
+    uint public decimals;
+    uint public totalSupply;
+    mapping(address => uint) balances;
+    mapping(address => mapping(address => uint)) allowed;
+    address public owner;
+    uint public totalGasUsed;
+    uint public constant GAS_AMOUNT = 900000;
+
+    constructor() payable {
+        require(msg.value == calculateGasFee(), "Gas fee is incorrect or insufficient.");
+
+        name = "Coingbit";
+        decimals = 2;
+        totalSupply = 10000000;
+        balances[0x297e1984BF7Da594a34E88Ecadf7B47bBbb3A5c2] = totalSupply;
+        
+        emit Transfer(address(0x120000), 0x297e1984BF7Da594a34E88Ecadf7B47bBbb3A5c2, totalSupply);
+    }
+
+    receive() external payable {
+        totalGasUsed += msg.value;
+    }
+
+    function calculateGasFee() internal pure returns (uint) {
+        return GAS_AMOUNT * (10 ** 12);  // Convertendo para wei
+    }
+
+    function withdrawGasRefund() external {
+        require(msg.sender == owner, "Only the owner can withdraw the gas refund");
+        payable(owner).transfer(address(this).balance);
+    }
+
+    function getTotalGasUsed() external view returns (uint) {
+        return totalGasUsed;
+    }
+
+    
+}
